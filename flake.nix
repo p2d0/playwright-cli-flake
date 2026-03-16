@@ -26,10 +26,55 @@
         );
     in
     {
-      packages = forAllSystems ({ pkgs, ... }: {
-        default = pkgs.runCommand "playwright-cli" {} "mkdir $out";
-      });
+      packages = forAllSystems (
+        { pkgs, ... }:
+        let
+          versions = import ./versions.nix;
+          playwright = pkgs.callPackage ./package.nix {
+            inherit (versions) version srcHash npmDepsHash;
+          };
+        in
+        {
+          playwright-cli = playwright;
+          default = playwright;
+        }
+      );
 
-      formatter = forAllSystems ({ pkgs, ... }: pkgs.nixfmt);
+      apps = forAllSystems (
+        { pkgs, ... }:
+        let
+          versions = import ./versions.nix;
+          playwright = pkgs.callPackage ./package.nix {
+            inherit (versions) version srcHash npmDepsHash;
+          };
+        in
+        {
+          playwright-cli = {
+            type = "app";
+            program = "${playwright}/bin/playwright-cli";
+          };
+          default = {
+            type = "app";
+            program = "${playwright}/bin/playwright-cli";
+          };
+        }
+      );
+
+      devShells = forAllSystems (
+        { pkgs, ... }:
+        let
+          versions = import ./versions.nix;
+          playwright = pkgs.callPackage ./package.nix {
+            inherit (versions) version srcHash npmDepsHash;
+          };
+        in
+        {
+          default = pkgs.mkShell {
+            packages = [ playwright ];
+          };
+        }
+      );
+
+      formatter = forAllSystems ({ pkgs, ... }: pkgs.nixfmt-rfc-style);
     };
 }

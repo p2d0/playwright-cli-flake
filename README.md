@@ -1,14 +1,13 @@
 # Playwright CLI
 
-This is a Nix Flake for the [Playwright](https://playwright.dev) CLI tool.
+This is a Nix Flake for the [Playwright](https://playwright.dev) CLI tool (`@playwright/cli`).
 
 ## Contents
 
 - [Usage](#usage)
 - [Use this flake in your project](#use-this-flake-in-your-project)
-- [Override the Playwright CLI version](#override-the-playwright-cli-version)
 - [Supported platforms](#supported-platforms)
-- [Notes](#notes)
+- [Updating](#updating)
 
 ## Usage
 
@@ -28,6 +27,12 @@ Build the package:
 
 ```bash
 nix build .#playwright-cli
+```
+
+Add to a temporary shell:
+
+```bash
+nix shell . --command playwright-cli --help
 ```
 
 ## Use this flake in your project
@@ -59,29 +64,7 @@ Add this flake as an input and include the package in your dev shell.
 }
 ```
 
-Then run `nix develop` and use `playwright`.
-
-## Override the Playwright CLI version
-
-The package is parameterized by `version`, `fileVersion`, and `hash`.
-
-If you want to use a different Playwright CLI version, override these values:
-
-```nix
-let
-  playwright = playwright-cli.packages.${system}.playwright-cli.override {
-    version = "<playwright-version>";
-    fileVersion = "<file-version>"; # defaults to version if omitted
-    hash = "<nix-hash>";
-  };
-in {
-  devShells.${system}.default = pkgs.mkShell {
-    packages = [playwright];
-  };
-}
-```
-
-To get the correct `hash` for a new version, run a build once and copy the `got: ...` hash from the failure message.
+Then run `nix develop` and use `playwright-cli`.
 
 ## Supported platforms
 
@@ -90,6 +73,12 @@ To get the correct `hash` for a new version, run a build once and copy the `got:
 - `x86_64-darwin`
 - `aarch64-darwin`
 
-## Notes
+## Updating
 
-- Versions are updated weekly via GitHub Actions.
+To bump to the latest release, run:
+
+```bash
+./update.sh
+```
+
+This fetches the latest tag from GitHub, computes the source and npm dependency hashes, and rewrites `versions.nix`.
