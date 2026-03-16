@@ -8,7 +8,8 @@ LATEST=$(curl -s "https://api.github.com/repos/microsoft/playwright-cli/releases
 echo "Latest version: $LATEST"
 
 # Compute srcHash
-SRC_HASH=$(nix run nixpkgs#nix-prefetch-github -- microsoft playwright-cli --rev "v${LATEST}" --json \
+SRC_HASH=$(nix store prefetch-file --unpack --json \
+  "https://github.com/microsoft/playwright-cli/archive/refs/tags/v${LATEST}.tar.gz" \
   | grep '"hash"' | sed 's/.*"hash": *"\([^"]*\)".*/\1/')
 
 echo "srcHash: $SRC_HASH"
